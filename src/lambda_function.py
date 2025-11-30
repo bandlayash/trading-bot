@@ -9,15 +9,22 @@ import logging
 import pandas as pd
 import os
 import talib
+import boto3
+
+ssm = boto3.client("ssm")
+
+ALPACA_KEY = ssm.get_parameter(Name=os.environ["ALPACA_KEY_PARAM"], WithDecryption=True)["Parameter"]["Value"]
+
+ALPACA_SECRET = ssm.get_parameter(Name=os.environ["ALPACA_SECRET_PARAM"], WithDecryption=True)["Parameter"]["Value"]
 
 # Setting up paper trading client
-trading_client = TradingClient(os.getenv("ALPACA_KEY"), os.getenv("ALPACA_SECRET"), paper=True)
+trading_client = TradingClient(ALPACA_KEY, ALPACA_SECRET, paper=True)
 SYMBOLS = os.environ.get('SYMBOLS').split(",")
 RISK_PCT = float(os.environ.get('RISK_PCT'))
 MINUTES_HISTORY = int(os.environ.get('MINUTES_HISTORY'))
 
 # Setting up data client
-data_client = StockHistoricalDataClient(api_key=os.getenv("ALPACA_KEY"), api_secret=os.getenv("ALPACA_SECRET"))
+data_client = StockHistoricalDataClient(api_key=ALPACA_KEY, api_secret=ALPACA_SECRET)
 
 # logger
 logger = logging.getLogger()
