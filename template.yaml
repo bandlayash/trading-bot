@@ -26,8 +26,8 @@ Resources:
 
       Environment:
         Variables:
-          ALPACA_KEY: "{{resolve:ssm:/alpaca/live/key}}"
-          ALPACA_SECRET: "{{resolve:ssm:/alpaca/live/secret}}"
+          ALPACA_KEY: "{{resolve:ssm-secure:/alpaca/live/key}}"
+          ALPACA_SECRET: "{{resolve:ssm-secure:/alpaca/live/secret}}"
 
       Policies:
         - AWSLambdaBasicExecutionRole
