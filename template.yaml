@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: RSI/EMA Trading Bot – Lambda + EventBridge Schedule
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 512
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        SYMBOLS: "SPYU,TQQQ"
+        RISK_PCT: "0.03"
+        ALPACA_BASE_URL: "https://paper-api.alpaca.markets/v2"
+        MINUTES_HISTORY: "200"
+
+Resources:
+
+  TradingLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: lambda_function.lambda_handler
+
+      Environment:
+        Variables:
+          ALPACA_KEY: "{{resolve:ssm:/alpaca/live/key}}"
+          ALPACA_SECRET: "{{resolve:ssm:/alpaca/live/secret}}"
+
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource:
+                - arn:aws:ssm:*:*:parameter/alpaca/live/key
+                - arn:aws:ssm:*:*:parameter/alpaca/live/secret
+
+      Events:
+        TradeSchedule:
+          Type: Schedule
+          Properties:
+            # 5 minutes during market hours (9:30–16:00 ET)
+            # UTC conversion: 14:30–21:00
+            Schedule: "cron(*/5 14-21 ? * MON-FRI)"
+            Name: "TradeEveryFiveMinutes"
+            Description: "Runs the trading bot every 5 minutes during market hours."
+
+Outputs:
+  TradingLambdaArn:
+    Description: ARN for TradingLambda
+    Value: !GetAtt TradingLambda.Arn
+
+  TradingLambdaName:
+    Description: Name for TradingLambda
+    Value: !Ref TradingLambda
