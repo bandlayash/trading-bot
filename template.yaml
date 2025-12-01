@@ -43,6 +43,8 @@ Resources:
             - Effect: Allow
               Action:
                 - cloudwatch:PutMetricData
+                - cloudwatch:PutDashboard
+                - cloudwatch:DeleteDashboards
               Resource: "*"
 
       Events:
