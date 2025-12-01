@@ -38,6 +38,13 @@ Resources:
                 - arn:aws:ssm:*:*:parameter/alpaca/live/key
                 - arn:aws:ssm:*:*:parameter/alpaca/live/secret
 
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - cloudwatch:PutMetricData
+              Resource: "*"
+
       Events:
         TradeSchedule:
           Type: Schedule
@@ -45,6 +52,67 @@ Resources:
             Schedule: "cron(*/5 14-21 ? * MON-FRI *)"
             Name: "TradeEveryFiveMinutes"
             Description: "Runs the trading bot every 5 minutes during market hours."
+
+  TradingBotDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: "TradingBotDashboard"
+      DashboardBody:
+        Fn::Sub: |
+          {
+            "widgets": [
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "TradingBot", "Equity" ]
+                  ],
+                  "title": "Portfolio Equity"
+                }
+              },
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "TradingBot", "RSI", "Symbol", "TQQQ" ],
+                    [ "TradingBot", "RSI", "Symbol", "SPYU" ]
+                  ],
+                  "title": "RSI(14)"
+                }
+              },
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "TradingBot", "EMA9", "Symbol", "TQQQ" ],
+                    [ "TradingBot", "EMA9", "Symbol", "SPYU" ]
+                  ],
+                  "title": "EMA(9)"
+                }
+              },
+              {
+                "type": "metric",
+                "width": 12,
+                "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "TradingBot", "BuySignal",  "Symbol", "TQQQ" ],
+                    [ ".",          "SellSignal", "Symbol", "TQQQ" ],
+                    [ ".",          "BuySignal",  "Symbol", "SPYU" ],
+                    [ ".",          "SellSignal", "Symbol", "SPYU" ]
+                  ],
+                  "title": "Trade Signals (TQQQ & SPYU)"
+                }
+              }
+            ]
+          }
+
 
 Outputs:
   TradingLambdaArn:

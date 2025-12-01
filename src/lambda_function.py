@@ -11,7 +11,9 @@ import os
 import talib
 import boto3
 
+# boto3 clients for SSM and Cloudwatch
 ssm = boto3.client("ssm")
+cw = boto3.client("cloudwatch")
 
 ALPACA_KEY = ssm.get_parameter(Name=os.environ["ALPACA_KEY_PARAM"], WithDecryption=True)["Parameter"]["Value"]
 
@@ -24,7 +26,7 @@ RISK_PCT = float(os.environ.get('RISK_PCT'))
 MINUTES_HISTORY = int(os.environ.get('MINUTES_HISTORY'))
 
 # Setting up data client
-data_client = StockHistoricalDataClient(api_key=ALPACA_KEY, api_secret=ALPACA_SECRET)
+data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
 
 # logger
 logger = logging.getLogger()
@@ -108,6 +110,10 @@ def evaluate_and_trade(symbol: str):
 
     logger.info("%s -> close=%.4f rsi=%.2f ema9=%.4f", symbol, c, rsi, ema9)
 
+    publish_metric("RSI", rsi, symbol)
+    publish_metric("EMA9", ema9, symbol)
+    publish_metric("Price", c, symbol)
+
     # BUY
     if rsi < 30 and c < ema9:
         
@@ -117,6 +123,11 @@ def evaluate_and_trade(symbol: str):
         logger.info("Buying %s using %.2f notional (equity=%.2f)", symbol, notional, equity)
 
         order = submit_market_notional_order(symbol, OrderSide.BUY, notional)
+
+        publish_metric("Equity", equity, "Portfolio")
+        publish_metric("TradeNotional", notional, symbol)
+
+        publish_metric("BuySignal", 1, symbol)
         return {
             "symbol": symbol,
             "action": "buy",
@@ -126,10 +137,15 @@ def evaluate_and_trade(symbol: str):
     
     # SELL 
     if rsi > 70 and c > ema9:
+        
 
         try:
             pos = trading_client.get_position(symbol)
+            pnl = float(pos.unrealized_pl)
             qty = float(pos.qty)
+
+            publish_metric("TradeQuantity", qty, symbol)
+            publish_metric("PnL", pnl, symbol)
 
             order_req = MarketOrderRequest(
                 symbol=symbol,
@@ -138,6 +154,7 @@ def evaluate_and_trade(symbol: str):
                 time_in_force=TimeInForce.DAY
             )
             order = trading_client.submit_order(order_data=order_req)
+            publish_metric("SellSignal", 1, symbol)
 
             return {
                 "symbol": symbol,
@@ -158,7 +175,34 @@ def evaluate_and_trade(symbol: str):
         "ema9": ema9
     }
 
+    
+
+
+def publish_metric(name, value, symbol):
+    """
+    Helper function to publish metrics for dashboard
+    """
+    dims = []
+    if symbol:
+        dims.append({"Name": "Symbol", "Value": symbol})
+
+    cw.put_metric_data(
+        Namespace="TradingBot",
+        MetricData=[{
+            "MetricName": name,
+            "Dimensions": dims,
+            "Value": float(value),
+            "Unit": "None"
+        }]
+    )
+
+
+
+
 def lambda_handler(event, context):
+    equity = get_portfolio_equity()
+    publish_metric("Equity", equity, "Portfolio")
+
     results = []
     for sym in SYMBOLS:
         try:
