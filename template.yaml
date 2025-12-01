@@ -11,6 +11,17 @@ Globals:
       - x86_64
 
 Resources:
+
+  TradingDependenciesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: trading-bot-deps
+      ContentUri: layer.zip
+      CompatibleRuntimes:
+        - python3.12
+      Description: Python deps for trading bot (alpaca, pandas, TA-lib, boto3)
+
+
   TradingLambda:
     Type: AWS::Serverless::Function
     Properties:

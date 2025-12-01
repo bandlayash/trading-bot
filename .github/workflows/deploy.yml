@@ -26,6 +26,11 @@ jobs:
           role-session-name: github-deploy-session
           aws-region: us-east-1
 
+      - name: Build Lambda Layer
+        run: |
+          chmod +x build-layer.sh 
+          ./build-layer.sh
+
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
 
