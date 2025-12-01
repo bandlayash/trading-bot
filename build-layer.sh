@@ -1,30 +1,24 @@
 #!/bin/bash
 set -e
 
-LAYER_DIR="layer/python"
-rm -rf layer
-mkdir -p $LAYER_DIR
+# Clean old layer
+rm -rf python layer
+mkdir -p python
 
-echo "Building Lambda Layer for Python 3.12 on Amazon Linux 2023..."
-
+# Build inside Amazon Linux 2023 (matches Lambda)
 docker run --rm \
-  -v "$(pwd)":/var/task \
-  public.ecr.aws/lambda/python:3.12 \
+  -v "$PWD":/var/task \
+  -w /var/task \
+  public.ecr.aws/amazonlinux/amazonlinux:2023 \
   /bin/bash -c "
-    set -e
-    echo 'Installing dependencies inside Amazon Linux 2023...'
-    python3.12 -m pip install --upgrade pip
-    python3.12 -m pip install -r requirements.txt -t layer/python
-  "
+    yum update -y &&
+    yum install -y python3 python3-devel gcc gcc-c++ make \
+                    tar gzip unzip findutils
 
-echo "Removing unnecessary files..."
-find layer/python -name '*.dist-info' -type d -exec rm -rf {} +
-find layer/python -name '__pycache__' -type d -exec rm -rf {} +
+    pip3 install --upgrade pip
+    pip3 install -r requirements.txt -t python/
+"
 
-echo "Creating layer.zip..."
-cd layer
-zip -r ../layer.zip .
-cd ..
-
-echo "Done"
-echo "Created layer.zip — ready to publish as a Lambda Layer."
+# Zip layer
+zip -r layer.zip python/
+echo "✓ Layer built: layer.zip"
