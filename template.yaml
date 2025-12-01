@@ -68,6 +68,7 @@ Resources:
                 "width": 12,
                 "height": 6,
                 "properties": {
+                  "region": "us-east-1",
                   "metrics": [
                     [ "TradingBot", "Equity" ]
                   ],
@@ -79,6 +80,7 @@ Resources:
                 "width": 12,
                 "height": 6,
                 "properties": {
+                  "region": "us-east-1",
                   "metrics": [
                     [ "TradingBot", "RSI", "Symbol", "TQQQ" ],
                     [ "TradingBot", "RSI", "Symbol", "SPYU" ]
@@ -91,6 +93,7 @@ Resources:
                 "width": 12,
                 "height": 6,
                 "properties": {
+                  "region": "us-east-1",
                   "metrics": [
                     [ "TradingBot", "EMA9", "Symbol", "TQQQ" ],
                     [ "TradingBot", "EMA9", "Symbol", "SPYU" ]
@@ -103,6 +106,7 @@ Resources:
                 "width": 12,
                 "height": 6,
                 "properties": {
+                  "region": "us-east-1",
                   "metrics": [
                     [ "TradingBot", "BuySignal",  "Symbol", "TQQQ" ],
                     [ ".",          "SellSignal", "Symbol", "TQQQ" ],
