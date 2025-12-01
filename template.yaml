@@ -27,6 +27,8 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: lambda_function.lambda_handler
+      Layers:
+        - !Ref TradingDependenciesLayer
 
       Environment:
         Variables:
