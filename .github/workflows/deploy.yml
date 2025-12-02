@@ -31,7 +31,7 @@ jobs:
           echo "Building Python Lambda Layer..." 
           mkdir -p layer/python
 
-          pip install -r layer/layer-requirements.txt -t layer/python
+          pip install -r requirements.txt -t layer/python
 
           cd layer
           zip -r ../layer.zip python
