@@ -178,7 +178,7 @@ def evaluate_and_trade(symbol: str):
     
 
 
-def publish_metric(name, value, symbol):
+def publish_metric(name, value, symbol=None):
     """
     Helper function to publish metrics for dashboard
     """
