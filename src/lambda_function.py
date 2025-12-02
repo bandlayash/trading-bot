@@ -26,7 +26,7 @@ RISK_PCT = float(os.environ.get('RISK_PCT'))
 MINUTES_HISTORY = int(os.environ.get('MINUTES_HISTORY'))
 
 # Setting up data client
-data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET, feed = "iex")
+data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
 
 # logger
 logger = logging.getLogger()
@@ -53,7 +53,7 @@ def fetch_minute_bars(symbol: str, minutes: int) -> pd.DataFrame:
 
     end = datetime.now(timezone.utc)
     start = end - timedelta(minutes=minutes*2)
-    req = StockBarsRequest(symbol_or_symbols=[symbol], start=start.isoformat(), end=end.isoformat(),timeframe=TimeFrame.Minute)
+    req = StockBarsRequest(symbol_or_symbols=[symbol], start=start.isoformat(), end=end.isoformat(),timeframe=TimeFrame.Minute, feed="iex")
     bars = data_client.get_stock_bars(req)
     df = bars.df
 
