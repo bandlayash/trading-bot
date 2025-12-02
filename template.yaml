@@ -35,7 +35,7 @@ Resources:
           SYMBOLS: "SPYU,TQQQ"
           RISK_PCT: "0.03"
           PAPER: "True"
-          MINUTES_HISTORY: "15"
+          MINUTES_HISTORY: "200"
           # SSM parameter names; keys fetched inside Lambda
           ALPACA_KEY_PARAM: "/alpaca/live/key"
           ALPACA_SECRET_PARAM: "/alpaca/live/secret"

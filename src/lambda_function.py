@@ -26,7 +26,7 @@ RISK_PCT = float(os.environ.get('RISK_PCT'))
 MINUTES_HISTORY = int(os.environ.get('MINUTES_HISTORY'))
 
 # Setting up data client
-data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
+data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET, feed = "iex")
 
 # logger
 logger = logging.getLogger()
