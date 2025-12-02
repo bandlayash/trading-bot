@@ -26,10 +26,17 @@ jobs:
           role-session-name: github-deploy-session
           aws-region: us-east-1
 
-      - name: Build Lambda Layer
+      - name: Build Lambda Layer Dependencies
         run: |
-          chmod +x build-layer.sh 
-          ./build-layer.sh
+          echo "Building Python Lambda Layer..." 
+          mkdir -p layer/python
+
+          pip install -r layer/layer-requirements.txt -t layer/python
+
+          cd layer
+          zip -r ../layer.zip python
+
+        shell: bash
 
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
