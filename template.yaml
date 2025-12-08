@@ -83,7 +83,7 @@ Resources:
                 "properties": {
                   "region": "us-east-1",
                   "metrics": [
-                    [ "TradingBot", "Equity" ]
+                    [ "TradingBot", "Equity", "Symbol", "Portfolio" ]
                   ],
                   "title": "Portfolio Equity"
                 }
