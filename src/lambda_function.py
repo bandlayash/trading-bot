@@ -10,6 +10,7 @@ import pandas as pd
 import os
 import talib
 import boto3
+import json
 
 # boto3 clients for SSM and Cloudwatch
 ssm = boto3.client("ssm")
@@ -200,6 +201,26 @@ def publish_metric(name, value, symbol=None):
 
 
 def lambda_handler(event, context):
+    if "requestContext" in event and "http" in event["requestContext"]:
+        headers = {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "https://ybandla.com",
+            "Access-Control-Allow-Methods": "GET"
+        }
+        try:
+            equity = get_portfolio_equity()
+            return {
+                "statusCode": 200,
+                "headers": headers,
+                "body": json.dumps({"equity": equity})
+            }
+        except Exception as e:
+            return {
+                "statusCode": 500,
+                "headers": headers,
+                "body": json.dumps({"equity": equity})
+            }
+    logger.info("Handling Scheduled Event (Trading Logic)")
     equity = get_portfolio_equity()
     publish_metric("Equity", equity, "Portfolio")
 
